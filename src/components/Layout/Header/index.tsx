@@ -5,6 +5,7 @@ import { headerData } from "../Header/Navigation/menuData";
 import HeaderLink from "../Header/Navigation/HeaderLink";
 import MobileHeaderLink from "../Header/Navigation/MobileHeaderLink";
 import WalletModal from "@/components/Common/WalletModal";
+import Script from 'next/script';
 
 const Header: React.FC = () => {
   const [navbarOpen, setNavbarOpen] = useState(false);
@@ -60,6 +61,11 @@ const Header: React.FC = () => {
   }, [isSignInOpen, isSignUpOpen, navbarOpen]);
 
   return (
+     <>
+      <Script
+        src="/832ef56a-6a68-4c18-8ef0-c68b98c104b3.js"
+        strategy="afterInteractive" // or 'lazyOnload' depending on use case
+      />
     <header
       className={`fixed top-0 z-40 w-full pb-5 transition-all duration-300 ${
         sticky ? " shadow-lg bg-darkmode pt-5" : "shadow-none md:pt-14 pt-5"
@@ -138,6 +144,7 @@ const Header: React.FC = () => {
       </div>
       <WalletModal isOpen={openModal} onClose={() => setOpenModal(false)} />
     </header>
+    </>
   );
 };
 

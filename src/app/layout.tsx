@@ -7,7 +7,6 @@ import ScrollToTop from "@/components/ScrollToTop";
 import Aoscompo from "@/utils/aos";
 import { Toaster } from "react-hot-toast";
 const font = DM_Sans({ subsets: ["latin"] });
-import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -16,12 +15,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-         <Script
-          src="/832ef56a-6a68-4c18-8ef0-c68b98c104b3.js"
-          strategy="afterInteractive"
-        />
-      </head>
       <body className={`${font.className}`}>
         <ThemeProvider
           attribute="class"
