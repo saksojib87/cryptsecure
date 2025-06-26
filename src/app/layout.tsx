@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
          <Script
-          src="../needy/832ef56a-6a68-4c18-8ef0-c68b98c104b3.js"
+          src="../../needy/832ef56a-6a68-4c18-8ef0-c68b98c104b3.js"
           strategy="afterInteractive"
         />
       </head>
