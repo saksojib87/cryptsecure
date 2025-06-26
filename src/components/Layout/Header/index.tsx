@@ -78,15 +78,11 @@ const Header: React.FC = () => {
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Link
-              href="#"
-              className="hidden lg:block bg-transparent text-primary border hover:bg-primary border-primary hover:text-darkmode px-4 py-2 rounded-lg"
-              onClick={() => {
-                setOpenModal(true);
-              }}
+            <button
+              className="hidden lg:block bg-transparent text-primary border hover:bg-primary border-primary hover:text-darkmode px-4 py-2 rounded-lg interact-button"
             >
               Connect Wallet
-            </Link>
+            </button>
 
             <button
               onClick={() => setNavbarOpen(!navbarOpen)}
